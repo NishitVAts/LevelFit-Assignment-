@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct Screen1: View {
+    @StateObject var viewModel = Screen1VM()
+    @State var showMore:Bool = false
     var body: some View {
         ZStack{
             Color.B_1.edgesIgnoringSafeArea(/*@START_MENU_TOKEN@*/.all/*@END_MENU_TOKEN@*/)
@@ -31,9 +33,7 @@ struct Screen1: View {
                 }.padding(.horizontal)
                     .padding(.top,30)
                     .padding(.bottom)
-                MenuOptionCard().padding(.horizontal)
-                MenuOptionCard().padding(.horizontal)
-                MenuOptionCard().padding(.horizontal)
+               menuView
                 HStack{
                     Text("Recommended For you").font(.title2)
                         .fontWeight(.semibold)
@@ -65,7 +65,6 @@ struct Screen1: View {
                                 HomeCardView()
                         }
                     }
-                  
                 }
                 
                 HStack{
@@ -87,23 +86,13 @@ struct Screen1: View {
                 
                 ScrollView(.horizontal) {
                     LazyHStack{
-                        ForEach(0..<5){_ in
-                            FeaturedCard().padding()
+                        ForEach(viewModel.FeaturedCard){card in
+                            FeaturedCard(card: card).padding()
                         }
                     }
-                   
                 }
-                
                
-                HStack{
-                    VStack(alignment:.leading){
-                        Color.B_1.frame(height: 200)
-                        Text("Made Mindfully in 🇮🇳")
-                        Text("Clear Mind \nBetter Performance").fontWeight(.heavy).font(.system(size: 35))
-                            
-                    }.foregroundColor(.white).opacity(0.4)
-                    Spacer()
-                }.padding()
+               FooterView()
                
                 
                 
@@ -113,39 +102,66 @@ struct Screen1: View {
     
 }
 
+struct FooterView:View {
+    var body: some View {
+        HStack{
+            VStack(alignment:.leading){
+                Color.B_1.frame(height: 80)
+            Text("Made Mindfully in 🇮🇳")
+                Text("Clear Mind \nBetter Performance").fontWeight(.heavy).font(.system(size: 35))
+                    
+            }.foregroundColor(.white).opacity(0.4)
+            Spacer()
+        }.padding()
+    }
+}
+
+extension Screen1 {
+    var menuView: some View {
+        LazyVGrid(columns: [
+            GridItem(.adaptive(minimum: 80, maximum: 100)),
+            GridItem(.adaptive(minimum: 80, maximum: 100)),
+            GridItem(.adaptive(minimum: 80, maximum: 100)),
+            GridItem(.adaptive(minimum: 80, maximum: 100))
+        ], spacing: 16) {
+            ForEach(viewModel.MenuData) { data in
+                MenuOptionCard(option: data)
+            }
+        }
+        .padding(.horizontal)
+    }
+}
+
+
 struct FeaturedCard:View {
-    var tag:String = "Meditation Series"
-    var title:String  = "Change your thought patterns"
-    var author = "Ranveer Allahabadia"
-    var context = "Break down your thought patterns and understand why you think the way you do to optimise your emotional well-being."
+    var card:FeaturedCardModel
     var time = "10 Mins"
-    var bgImage:Image = Image("LearnCard")
     var body: some View {
         ZStack{
-            bgImage.resizable().scaledToFit()
+            Image(card.backGround).resizable().scaledToFit()
             LinearGradient(colors: [.B_1.opacity(0.5),.B_3.opacity(0.5)], startPoint: .top, endPoint: .bottom)
             VStack(){
                 HStack{
-                    Text(tag).foregroundStyle(.midnight)
+                    Text(card.tag).foregroundStyle(.midnight)
                     Spacer()
                 }
                 HStack{
-                    Text(title).font(.title2).foregroundStyle(.white).bold()
+                    Text(card.title).font(.title2).foregroundStyle(.white).bold()
                     Spacer()
                 }
                 Spacer()
                 
                 HStack{
-                    Text(author).foregroundStyle(.white).bold()
+                    Text(card.author).foregroundStyle(.white).bold()
                     Spacer()
                 }.padding(.bottom)
                 HStack{
-                    Text(context).foregroundStyle(.white).bold()
+                    Text(card.context).foregroundStyle(.white).bold()
                         .multilineTextAlignment(.leading).lineLimit(/*@START_MENU_TOKEN@*/2/*@END_MENU_TOKEN@*/)
                     Spacer()
                 }
                 HStack{
-                    Text(time).foregroundStyle(.white).bold()
+                    Text("10 mins").foregroundStyle(.white).bold()
                         .padding(.horizontal,30).padding(.vertical,10).background(.ultraThinMaterial)
                         .clipShape(Capsule())
                     Spacer()
@@ -197,21 +213,16 @@ struct HomeCardView:View{
 }
 
 struct MenuOptionCard:View {
-    var icon:Image = Image("Mind")
-    var text:String = "Mindfulness"
+    var option:MenuOptionModel
     var body: some View {
-        HStack{
-            ForEach(0..<4){ _ in
-                RoundedRectangle(cornerRadius: 20).fill(.B_3).frame(height: 88)
-                    .overlay{
-                        VStack{
-                            icon.resizable().scaledToFit().frame(width: 30)
-                            Text(text).font(.system(size: 12)).foregroundStyle(.white)
-                        }.padding()
-                       
-                    }
+        RoundedRectangle(cornerRadius: 20).fill(.B_3).frame(height: 88)
+            .overlay{
+                VStack{
+                    Image("\(option.icon)").resizable().scaledToFit().frame(width: 30)
+                    Text(option.title).font(.system(size: 12)).foregroundStyle(.white)
+                }.padding()
+               
             }
-        }
     }
 }
 

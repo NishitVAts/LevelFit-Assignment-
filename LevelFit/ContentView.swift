@@ -23,7 +23,7 @@ struct ContentView: View {
            appearance.stackedLayoutAppearance.normal.iconColor = UIColor.gray
            appearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.gray]
            
-           // Add shadow (optional)
+           
            appearance.shadowColor = UIColor.black.withAlphaComponent(0.2)
            
            // Customize unselected opacity (optional)
@@ -38,21 +38,20 @@ struct ContentView: View {
         NavigationStack{
             TabView {
                 Screen1().tabItem {
-                    Image("Home")
+                    Image(systemName:"house")
                     Text("Today")
                 }
-                
                 Screen1().tabItem {
-                    Image("Explore").resizable().scaledToFit().frame(width: 30)
-                    Text("Explore")
-                }
-                
-                Screen2View().tabItem {
-                    Image("You")
+                    Image(systemName:"magnifyingglass")
+                   
                     Text("You")
                 }
                 
-               
+                Screen2View().tabItem {
+                    Image(systemName:"person")
+                    Text("Explore")
+                }
+                
             }
         }
     }

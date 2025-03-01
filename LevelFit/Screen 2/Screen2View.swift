@@ -14,7 +14,8 @@ enum selectedTabs:String{
 }
 
 struct Screen2View: View {
-    @State var optionSelected:selectedTabs = .myLibrary
+    @State var optionSelected:selectedTabs = .insights
+    @StateObject var viewModel = Screen2VM()
     var body: some View {
         ZStack{
             Color.B_1.edgesIgnoringSafeArea(.all)
@@ -54,8 +55,8 @@ struct Screen2View: View {
                     
                     if optionSelected == .myLibrary{
                         MyLibrary()
-                        ForEach(0..<4){_ in
-                            SettingTabs()
+                        ForEach(viewModel.row){ row in
+                            SettingTabs(row: row)
                         }
                     }else {
                         Group{
@@ -64,19 +65,19 @@ struct Screen2View: View {
                             WeeklyChart()
                             
                             DailyChart()
+                            
+                            ScrollView(.horizontal){
+                                HStack{
+                                    ForEach(0..<5){ _ in
+                                        statisticsCard
+                                    }
+                                }
+                            }
                         }
                     }
                     
                     
-                    HStack{
-                        VStack(alignment:.leading){
-                            Color.B_1.frame(height:80)
-                            Text("Made Mindfully in 🇮🇳")
-                            Text("Clear Mind \nBetter Performance").fontWeight(.heavy).font(.system(size: 35))
-                                
-                        }.foregroundColor(.white).opacity(0.4)
-                        Spacer()
-                    }.padding()
+                    FooterView()
                     
                 }.scrollIndicators(.hidden)
             }
@@ -85,17 +86,21 @@ struct Screen2View: View {
     
     private var progressCard: some View{
         HStack{
-            Text("30%").font(.title)
-                .padding(.leading)
+            Group{
+                Image("DoubleAr").resizable().scaledToFit().frame(width:20,height: 30)
+                Text("30%").font(.title)
+            }
+           
             Rectangle().frame(width: 2)
                 .padding(.horizontal,10)
-            Text("Your mindfullness practice increases by 30% this week")
+            Text("Your mindfullness practice increases by **30%** this week")
+                .font(.system(size: 16))
                 .padding(.trailing)
         }.foregroundColor(.white)
             .padding()
             .background{
                 RoundedRectangle(cornerRadius: 20)
-                    .fill(LinearGradient(colors: [.green,.black], startPoint: .leading, endPoint: .trailing))
+                    .fill(LinearGradient(colors: [.mint1,.black.opacity(0.8)], startPoint: .trailing, endPoint: .leading))
             }
     }
     
@@ -120,6 +125,34 @@ struct Screen2View: View {
             
             
         }.foregroundStyle(.white)
+    }
+    
+    private var statisticsCard: some View{
+        VStack{
+            Text("Workout").font(.system(size: 21)).bold()
+            ZStack{
+                Image("Circle").resizable().scaledToFit().frame(width: 80)
+                Image("WorkoutPer").resizable().scaledToFit().frame(width: 120)
+            }
+            Rectangle().fill(.white).frame(height: 1)
+            HStack{
+                VStack{
+                    Text("200").font(.system(size:26)) .bold()
+                    Text("Sessions").foregroundColor(.white)
+                }
+               
+                Spacer()
+                VStack{
+                    Text("700").font(.system(size:26)) .bold()
+                    Text("XP").foregroundColor(.white)
+                }
+            }
+               
+        }.foregroundColor(.yellow)
+            .padding(.vertical)
+            .padding(.horizontal,10)
+            .background(.B_3)
+            .cornerRadius(20)
     }
    
 }
@@ -147,7 +180,6 @@ struct buttons:View {
 
 struct DailyChart: View {
     @StateObject var viewModel = Screen2VM()
-
     var body: some View {
         VStack(alignment:.leading) {
             Text("Mindful days this week")
@@ -164,39 +196,52 @@ struct DailyChart: View {
                 ForEach(viewModel.dailyData, id: \.Date) { item in
                     BarMark(
                         x: .value("Day", item.Date.dayOfWeek()),
-                        y: .value("XP", item.xp)
+                        y: .value("XP", item.xp),
+                        width: .fixed(15)
                     )
-                    .foregroundStyle(LinearGradient(colors: [.mint, .midnight], startPoint: .bottom, endPoint: .top))
                     .cornerRadius(20)
-                    .annotation(position: .top) {
-                        Text("\(item.xp)")
-                            .font(.caption)
-                            .foregroundColor(.white)
-                            .bold()
-                    }
+//                    .annotation(position: .top) {
+//                        Text("\(item.xp)")
+//                            .font(.caption)
+//                            .foregroundColor(.white)
+//                            .bold()
+//                    }
+                    .alignsMarkStylesWithPlotArea(true)
+                    .foregroundStyle(LinearGradient(colors: [.mint, .midnight], startPoint: .bottom, endPoint: .top))
                     
                 }
                 
-                // Average XP Line
+                
+                
                 RuleMark(y: .value("Average XP", viewModel.averageXP))
                     .lineStyle(StrokeStyle(lineWidth: 2, dash: [5]))
                     .foregroundStyle(.white)
                     
             }
             .frame(height: 300)
+            
             .padding()
-//            .chartXAxis {
-//                AxisMarks { value in
-//                    if let day = value.as(String.self) {
-//                        AxisValueLabel {
-//                            Text(day)
-//
-//                                .bold() // Make it bold
-//                                .foregroundColor(.white) // Change color
-//                        }
-//                    }
-//                }
-//            }
+            .chartXAxis {
+                AxisMarks { value in
+                    if let day = value.as(String.self) {
+                        AxisValueLabel {
+                            Text(day)
+                                .bold()
+                                .foregroundColor(.white)
+                        }
+                    }
+                }
+            }
+            .chartYAxis{
+                AxisMarks{ value in
+                    if let xp = value.as(Double.self){
+                        AxisValueLabel{
+                            Text("")
+                        }
+                    }
+                }
+            }
+            
         }
         .foregroundStyle(.white)
         .padding()
@@ -234,6 +279,17 @@ struct WeeklyChart: View {
                 }
             }
             .frame(height: 300)
+            .chartXAxis {
+                AxisMarks { value in
+                    if let week = value.as(String.self) {
+                        AxisValueLabel {
+                            Text(week)
+                                .bold()
+                                .foregroundColor(.white)
+                        }
+                    }
+                }
+            }
             .padding()
         }
         .foregroundStyle(.white)
@@ -263,19 +319,19 @@ struct MyLibrary:View {
                             HomeCardView()
                     }
                 }
-              
             }
         }
     }
 }
 
 struct SettingTabs:View {
+    var row:ListModel
     var icon:Image = Image(systemName:"heart")
     var text:String = "My Favourites"
     var body: some View {
         HStack{
-            icon
-            Text(text)
+            Image(row.icon).resizable().scaledToFit().frame(width: 30)
+            Text(row.name)
             Spacer()
             Image(systemName:"chevron.right")
         }.foregroundColor(.white)

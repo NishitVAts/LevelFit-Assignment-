@@ -11,7 +11,7 @@ import SwiftUI
 struct LevelFitApp: App {
     var body: some Scene {
         WindowGroup {
-            Screen1()
+            ContentView()
         }
     }
 }
